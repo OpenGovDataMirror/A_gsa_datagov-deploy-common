@@ -1,0 +1,41 @@
+---
+common_os_packages:
+  - acl
+  - atool
+  - cron
+  - git
+  - htop
+  - nano
+  - ntp
+  - python-dev
+  - python-pip
+  - python-setuptools
+  - python-virtualenv
+  - reboot-notifier
+  - ruby
+  - ruby-dev
+  - software-properties-common
+  - supervisor
+  - systemd
+
+  # python dependencies
+  - build-essential
+  - curl
+  - git
+  - libbz2-dev
+  - libffi-dev
+  - libdb-dev
+  - libgdbm-dev
+  - liblzma-dev
+  - libncurses5-dev
+  - libncursesw5-dev
+  - libreadline-dev
+  - libsqlite3-dev
+  - libssl-dev
+  - llvm
+  - make
+  - python-openssl
+  - tk-dev
+  - wget
+  - xz-utils
+  - zlib1g-dev

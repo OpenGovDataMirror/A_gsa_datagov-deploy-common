@@ -1,0 +1,80 @@
+---
+common_audit_report_enabled: false
+
+# ca-certificates
+# grub
+# hostname
+
+# python-upgrade
+common_python_version_number: 2.7.10
+common_python_version_directory: /usr/local/lib/python{{ common_python_version_number }}
+common_python_version_url: https://www.python.org/ftp/python/{{ common_python_version_number}}/{{ common_python_version_name }}.tgz
+common_python_version_name: Python-{{ common_python_version_number }}
+
+
+# filebeat
+filebeat_enabled: false
+
+# By default allow SSH access from anywhere, can specify jumpbox ip to limit
+jumpbox_ips: ['*']
+
+
+# postfix
+postfix_debconf_selections:
+ - name: postfix
+   question: postfix/main_mailer_type
+   value: No configuration
+   vtype: select
+
+# TLS
+common_tls_host_certificate: "test certificate"
+common_tls_host_key: "test key"
+
+# newrelic-infra
+common_newrelic_enabled: false
+
+
+# nessus
+nessus_agent_key: ''
+nessus_agent_group: ''
+nessus_agent_url:
+# Provided by GSA SecOps
+# https://drive.google.com/drive/folders/0B726fftFCN-oemFRazdnM3FITE0
+nessus_agent_package: NessusAgent-8.3.1-ubuntu1110_amd64.deb
+nessus_agent_host: cloud.tenable.com
+nessus_agent_port: 443
+nessus_agent_enabled: false
+
+
+# trendmicro
+trendmicro_enabled: false
+trendmicro_deb_url: https://dsm.sec.helix.gsa.gov/software/agent/Ubuntu_18.04/x86_64/
+
+
+# unattended-upgrades
+unattended_origins_patterns:
+ - 'origin=Ubuntu,archive=${distro_codename}-security'
+ - 'o=Ubuntu,a=${distro_codename}'
+ - 'o=Ubuntu,a=${distro_codename}-updates'
+unattended_package_blacklist: []
+unattended_mail: "{{ datagov_team_email }}"
+unattended_mail_only_on_error: true
+
+# ntp - to add - aws nist
+ntp_server: gsa
+
+# logrotate
+logrotate_scripts:
+ - name: audit-log
+   path: "/var/log/audit/audit.log"
+   options:
+    - daily
+    - missingok
+    - compress
+    - delaycompress
+    - copytruncate
+    - size 250M
+    - rotate 5
+
+# ubuntu advantage
+common_ubuntu_advantage_enabled: false

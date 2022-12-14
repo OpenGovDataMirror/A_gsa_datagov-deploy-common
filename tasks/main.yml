@@ -1,0 +1,146 @@
+---
+- import_tasks: hostname.yml
+  tags:
+    - hostname
+
+- import_tasks: ua.yml
+  tags:
+    - ua
+  when:
+    - common_ubuntu_advantage_enabled
+
+- import_tasks: hardening.yml
+  tags:
+    - hardening
+    - molecule-notest
+
+- name: Install upstart for Ubuntu Trusty
+  import_role:
+    name: dwcramer.upstart
+  when: ansible_distribution_release == "trusty"
+  tags:
+    - upstart
+
+- name: Remove broken upstart log rotation
+  file: path=/etc/logrotate.d/upstart state=absent
+  when: ansible_distribution_release == "trusty"
+  tags:
+    - upstart
+
+- name: Install operator keys to ubuntu user, restricted to jumpbox
+  blockinfile:
+    path: /home/ubuntu/.ssh/authorized_keys
+    block: |
+      {% for operator in common_operators %}
+      from="{{ jumpbox_ips | join(',') }}" {{ operator.public_key }}
+      {% endfor %}
+    marker: "# {mark} ANSIBLE MANAGED LIST OF USERS"
+
+- name: Configure shell prompt
+  lineinfile:
+    path: /home/ubuntu/.bashrc
+    line: PS1='{{ common_shell_prompt }}'
+    state: present
+  when: common_shell_prompt is defined
+
+- name: Install build-essential
+  import_role:
+    name: ANXS.build-essential
+
+- name: Install apt-utils
+  import_role:
+    name: ANXS.apt
+
+- import_tasks: system-packages.yml
+  tags:
+    - system-packages
+
+- import_tasks: tls.yml
+  tags:
+    - tls
+
+- name: Install unattended-upgrades
+  import_role:
+    name: jnv.unattended-upgrades
+  tags:
+    - unattended-upgrades
+
+# https://github.com/GSA/datagov-deploy/issues/2103
+- name: override registered postfix_main_cf file set in ansible-ubuntu-16
+  set_fact:
+    postfix_main_cf: /etc/postfix/main.cf
+  tags:
+    - postfix
+
+- name: Install postfix mail server
+  import_role:
+    name: oefenweb.postfix
+  tags:
+    - postfix
+
+- name: Install secops filebeat agent
+  import_role:
+    name: jobscore.beats
+  vars:
+    # Don't pin the version, allow filebeat to be updated
+    # from apt
+    beats_hold_products: false
+    beats_ver: "6.*"  # apt-get version specifier. We want the latest 6.x
+    beats_products:
+      - filebeat
+  when: filebeat_enabled
+  tags:
+    - filebeat
+
+- name: Install logrotate
+  import_role:
+    name: nickhammond.logrotate
+  tags:
+    - logrotate
+
+- import_tasks: audit-report.yml
+  tags:
+    - audit-report
+
+- import_tasks: ca-certficates.yml
+  tags:
+    - ca-certificates
+
+- import_tasks: grub.yml
+  tags:
+    - grub
+
+- import_tasks: nessus.yml
+  when: nessus_agent_enabled
+  tags:
+    - nessus
+
+- import_tasks: ntp.yml
+  tags:
+    - ntp
+
+- import_tasks: python-upgrade.yml
+  tags:
+    - python-upgrade
+
+- import_tasks: reboot-notify.yml
+  tags:
+    - reboot-notify
+
+- import_tasks: trendmicro.yml
+  when: trendmicro_enabled
+  tags:
+    - trendmicro
+    - molecule-notest      # to fix
+
+# Any service monitored by New Relic should've been started by now. We put this
+# at the end to avoid getting alerts when first provisioning a machine.
+# Otherwise, we'll start monitoring and alerting on things that might not have
+# been provisioned yet.
+- name: Install newrelic infrastructure agent
+  import_role:
+    name: newrelic.newrelic-infra
+  when: common_newrelic_enabled
+  tags:
+    - newrelic
+    - molecule-notest      # to fix

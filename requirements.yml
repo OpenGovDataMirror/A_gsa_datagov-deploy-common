@@ -1,0 +1,16 @@
+---
+
+- src: ANXS.apt
+- src: ANXS.build-essential
+- src: dwcramer.upstart
+- src: nickhammond.logrotate
+- src: oefenweb.postfix
+- src: newrelic.newrelic-infra
+- src: jnv.unattended-upgrades
+- src: jobscore.beats
+- src: https://github.com/GSA/ansible-os-ubuntu-14
+  name: gsa.ansible-os-ubuntu-14
+  version: master
+- src: https://github.com/GSA/ansible-os-ubuntu-16
+  name: gsa.ansible-os-ubuntu-16
+  version: master
